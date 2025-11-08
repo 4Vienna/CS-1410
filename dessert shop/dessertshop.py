@@ -71,7 +71,7 @@ class DessertShop:
 
     def user_prompt_sundae(self):
         """Prompts the user for sundae details and returns a Sundae object"""
-        name = input("Enter the name of the sundae: ")
+        name = input("Enter the type of icecream: ")
         while True:
             try:
                 scoop_count = int(input("Enter the number of scoops: "))
@@ -150,8 +150,20 @@ def main():
     
     # Add your code below here to print the receipt as the last thing in main()
     # Make sure that the output format matches the provided sample run
+    headers = ["Name", "Cost", "Tax"]
 
-    print(tabulate(order.to_list(), tablefmt="fsql"))
+    # Build rows using Order.to_list which now returns multiple rows per item
+    rows = order.to_list()
+
+    # Print the table. Use plain format so the multi-line layout looks like the sample.
+    print(tabulate(rows, headers = headers, tablefmt="plain", colalign=("left","right","left")))
+
+    # Print totals similar to the sample layout
+    print('-' * 31 + '  ' + '-' * 10 + '  ' + '-' * 12)
+    print(f"Total number of items in order:  {len(order)}")
+    print(f"Order Subtotals:                 ${order.order_cost():.2f}       [Tax: ${order.order_tax():.2f}]")
+    print(f"Order Total:                                 ${order.order_cost() + order.order_tax():.2f}")
+    print('-' * 31 + '  ' + '-' * 10 + '  ' + '-' * 12)
     
 
 if __name__ == "__main__":

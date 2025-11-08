@@ -7,21 +7,25 @@ def test_Cookie_default():
     assert cookie.name == ""
     assert cookie.number_of_cookies == 0.0
     assert cookie.price_per_dozen == 0.0
+    assert cookie.packaging == "Box"
 
 def test_Cookie_custom():
-    cookie = Cookie("Generic Cookie", 12, 10.0)
+    cookie = Cookie("Generic Cookie", 12, 10.0, "Bag")
     assert cookie.name == "Generic Cookie"
     assert cookie.number_of_cookies == 12
     assert cookie.price_per_dozen == 10.0
+    assert cookie.packaging == "Bag"
 
 def test_Cookie_update():
     cookie = Cookie("Test Cookie", 6,5.0)
     cookie.name = "Updated Cookie"
     cookie.number_of_cookies = 1.5
     cookie.price_per_dozen = 4.0
+    cookie.packaging = "Wrapper"
     assert cookie.name == "Updated Cookie"
     assert cookie.number_of_cookies == 1.5
     assert cookie.price_per_dozen == 4.0
+    assert cookie.packaging == "Wrapper"
 
 def test_Cookie_calculate_cost():
     cookie = Cookie("Chocolate Chip", 6, 3.99)

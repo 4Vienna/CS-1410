@@ -7,21 +7,25 @@ def test_Candy_default():
     assert candy.name == ""
     assert candy.weight == 0.0
     assert candy.price_per_pound == 0.0
+    assert candy.packaging == "Bag"
 
 def test_Candy_custom():
-    candy = Candy("Generic Candy", 2.0, 3.5)
+    candy = Candy("Generic Candy", 2.0, 3.5, "Paper Bag")
     assert candy.name == "Generic Candy"
     assert candy.weight == 2.0
     assert candy.price_per_pound == 3.5
+    assert candy.packaging == "Paper Bag"
 
 def test_Candy_update():
     candy = Candy("Test Candy", 3.0,5.0)
     candy.name = "Updated Candy"
     candy.weight = 1.5
     candy.price_per_pound = 4.0
+    candy.packaging = "Clear Bag"
     assert candy.name == "Updated Candy"
     assert candy.weight == 1.5
     assert candy.price_per_pound == 4.0
+    assert candy.packaging == "Clear Bag"
 
 def test_Candy_calculate_cost():
     candy = Candy("Test Candy", 2.0, 3.0)
