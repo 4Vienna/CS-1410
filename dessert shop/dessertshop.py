@@ -1,4 +1,5 @@
 from dessert import Candy, Cookie, IceCream, Sundae, Order 
+from payment import Payable
 from tabulate import tabulate
 
 
@@ -101,6 +102,29 @@ class DessertShop:
                 print(f"Caught a ValueError: {e}.\nPlease enter a positive numeric value for price of topping")
 
         return Sundae(name, scoop_count, price_per_scoop, topping_name, topping_price)
+    
+    def payment(self):
+        pay = '\n'.join([ '\n',
+            '1: CASH',
+            '2: CARD',            
+            '3: PHONE',
+            '\nEnter payment method (1-3): '
+      ])
+        while True:
+            choice = input(pay)
+            match choice:
+                case '1':
+                    payment_method = "CASH"
+                    DessertShop().payment()
+                    break
+                case '2':
+                    payment_method = "CARD"
+                    break
+                case '3':
+                    payment_method = "PHONE"
+                    break
+                case _:
+                    print('Invalid response:  Please enter a choice from the menu (1-3)')
 
 def main():
     shop = DessertShop() 

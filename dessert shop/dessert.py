@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from packaging import Packaging
+from payment import Payable
 
 
 class DessertItem(ABC):
