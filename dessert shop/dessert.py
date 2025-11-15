@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from packaging import Packaging
-from payment import Payable
+from payment import Payment
 
 
 class DessertItem(ABC):
@@ -79,6 +79,8 @@ class Order():
     """Order class works as a list holding DessertItem objects"""
     def __init__(self):
         self.order = []
+        # use the Payment implementation to track/validate payment method
+        self._payment = Payment()
 
     def __len__(self):
         return len(self.order)
@@ -86,6 +88,13 @@ class Order():
 
     def add(self, item):
         self.order.append(item)
+
+    def payment(self, payment_method: str | None = None) -> str:
+        if payment_method is None:
+            return self._payment.get_pay_type()
+        self._payment.set_pay_type(payment_method)
+        return self._payment.get_pay_type()
+
 
 
     def order_cost(self):
@@ -113,27 +122,29 @@ class Order():
             # Candy
             if isinstance(item, Candy) and not isinstance(item, Sundae):
                 rows.append([f"{item.name} ({item.packaging})", "", ""])
-                desc = f"-\t{item.weight} lbs. @ ${item.price_per_pound}/lb:"
+                # avoid using tab characters (\t) — tabs expand inconsistently
+                desc = f"-    {item.weight} lbs. @ ${item.price_per_pound}/lb:"
                 rows.append([desc, f"${item.calculate_cost():.2f}", f"[Tax: ${item.calculate_tax():.2f}]"])
 
             # Cookie
             elif isinstance(item, Cookie):
                 rows.append([f"{item.name} Cookies ({item.packaging})", "", ""])
-                desc = f"-\t{item.number_of_cookies} cookies. @ ${item.price_per_dozen}/dozen:"
+                desc = f"-    {item.number_of_cookies} cookies. @ ${item.price_per_dozen}/dozen:"
                 rows.append([desc, f"${item.calculate_cost():.2f}", f"[Tax: ${item.calculate_tax():.2f}]"])
 
             # Sundae (special -- has scoop line then topping line)
             elif isinstance(item, Sundae):
                 rows.append([f"{item.topping_name} {item.name} Sundae ({item.packaging})", "", ""])
-                scoop_line = f"-\t{item.scoop_count} scoops. @ ${item.price_per_scoop}/scoop"
+                scoop_line = f"-    {item.scoop_count} scoops. @ ${item.price_per_scoop}/scoop"
                 rows.append([scoop_line, "", ""])
-                topping_line = f"-\t{item.topping_name} @ ${item.topping_price}:"
+                topping_line = f"-    {item.topping_name} @ ${item.topping_price}:"
                 rows.append([topping_line, f"${item.calculate_cost():.2f}", f"[Tax: ${item.calculate_tax():.2f}]"])
 
             # IceCream (not sundae)
+                    # include payment method at end of order string
             elif isinstance(item, IceCream):
                 rows.append([f"{item.name} Ice Cream ({item.packaging})", "", ""])
-                desc = f"-\t{item.scoop_count} scoops. @ ${item.price_per_scoop}/scoop:"
+                desc = f"-    {item.scoop_count} scoops. @ ${item.price_per_scoop}/scoop:"
                 rows.append([desc, f"${item.calculate_cost():.2f}", f"[Tax: ${item.calculate_tax():.2f}]"])
 
             # Fallback for any other DessertItem
@@ -141,7 +152,6 @@ class Order():
                 rows.append([f"{getattr(item, 'name', '')}", f"${item.calculate_cost():.2f}", f"[Tax: ${item.calculate_tax():.2f}]"])
 
         return rows
-
 
     def __str__(self):
         output = ""
@@ -154,4 +164,11 @@ class Order():
                 output += f"{item.name}, {item.scoop_count}, {item.price_per_scoop}\n"
             elif isinstance(item, Sundae):
                 output += f"{item.name}, {item.scoop_count}, {item.price_per_scoop}, {item.topping_name}, {item.topping_price}\n"
+
+
+        try:
+            pay = self.payment()
+        except ValueError:
+            pay = "Invalid"
+        output += f"Payment Method: {pay}\n"
         return output
