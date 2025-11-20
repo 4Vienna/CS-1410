@@ -181,6 +181,7 @@ def main():
     headers = ["Name", "Cost", "Tax"]
 
     # Build rows using Order.to_list which now returns multiple rows per item
+    order.sort()
     rows = order.to_list()
 
     # Build column widths and print a nicely aligned receipt with separators

@@ -16,6 +16,25 @@ class DessertItem(ABC):
     def calculate_tax(self) -> float:
         return round(self.calculate_cost() * (self.tax_percent / 100), 2)
     
+    def __eq__(self, value):
+        return self.calculate_cost() == value.calculate_cost()
+    
+    def __ne__(self, value):
+        return self.calculate_cost() != value.calculate_cost()
+    
+    def __lt__(self, value):
+        return self.calculate_cost() < value.calculate_cost()
+    
+    def __le__(self, value):
+        return self.calculate_cost() <= value.calculate_cost()
+    
+    def __gt__(self, value):
+        return self.calculate_cost() > value.calculate_cost()
+    
+    def __ge__(self, value):
+        return self.calculate_cost() >= value.calculate_cost() 
+    
+    
 
 class Candy(DessertItem, Packaging):
     def __init__(self,name = "", candy_weight = 0.0, price_per_pound = 0.0, packaging = "Bag"):
@@ -95,6 +114,9 @@ class Order():
         self._payment.set_pay_type(payment_method)
         return self._payment.get_pay_type()
 
+
+    def sort(self):
+        self.order.sort(key=lambda item: item.calculate_cost())
 
 
     def order_cost(self):
