@@ -102,29 +102,31 @@ class DessertShop:
                 print(f"Caught a ValueError: {e}.\nPlease enter a positive numeric value for price of topping")
 
         return Sundae(name, scoop_count, price_per_scoop, topping_name, topping_price)
-    
-    def payment(self):
+
+    def user_prompt_payment(self):
+        """Prompt the user for payment method and return one of 'CASH','CARD','PHONE'.
+
+        Keeps prompting until the user selects a valid menu option.
+        """
         pay = '\n'.join([ '\n',
             '1: CASH',
-            '2: CARD',            
+            '2: CARD',
             '3: PHONE',
             '\nEnter payment method (1-3): '
-      ])
+        ])
         while True:
             choice = input(pay)
             match choice:
                 case '1':
-                    payment_method = "CASH"
-                    DessertShop().payment()
-                    break
+                    return 'CASH'
                 case '2':
-                    payment_method = "CARD"
-                    break
+                    return 'CARD'
                 case '3':
-                    payment_method = "PHONE"
-                    break
+                    return 'PHONE'
                 case _:
                     print('Invalid response:  Please enter a choice from the menu (1-3)')
+    
+        
 
 def main():
     shop = DessertShop() 
@@ -171,7 +173,9 @@ def main():
         case _:            
           print('Invalid response:  Please enter a choice from the menu (1-4) or Enter')
     print()
-    
+    # prompt for payment, validate, and set it on the order before printing
+    payment_method = shop.user_prompt_payment()
+    order.payment(payment_method)
     # Add your code below here to print the receipt as the last thing in main()
     # Make sure that the output format matches the provided sample run
     headers = ["Name", "Cost", "Tax"]
@@ -179,16 +183,54 @@ def main():
     # Build rows using Order.to_list which now returns multiple rows per item
     rows = order.to_list()
 
-    # Print the table. Use plain format so the multi-line layout looks like the sample.
-    print(tabulate(rows, headers = headers, tablefmt="plain", colalign=("left","right","left")))
+    # Build column widths and print a nicely aligned receipt with separators
+    cols = [headers] + rows
+    col_count = 3
+    widths = [0] * col_count
+    for c in range(col_count):
+        widths[c] = max(len(str(cols[r][c])) for r in range(len(cols)))
 
-    # Print totals similar to the sample layout
-    print('-' * 31 + '  ' + '-' * 10 + '  ' + '-' * 12)
-    print(f"Total number of items in order:  {len(order)}")
-    print(f"Order Subtotals:                 ${order.order_cost():.2f}       [Tax: ${order.order_tax():.2f}]")
-    print(f"Order Total:                                 ${order.order_cost() + order.order_tax():.2f}")
-    print('-' * 31 + '  ' + '-' * 10 + '  ' + '-' * 12)
-    
+    # top full-width separator
+    top_sep = '-' * widths[0] + '  ' + '-' * widths[1] + '  ' + '-' * widths[2]
+    print(top_sep)
+
+    # header line
+    header_line = headers[0].ljust(widths[0]) + '  ' + headers[1].rjust(widths[1]) + '  ' + headers[2].rjust(widths[2])
+    print(header_line)
+
+    # header underline: short left block (10 dashes) then full dashes for numeric columns
+    left_dash = 10 if widths[0] >= 10 else widths[0]
+    header_uline = ('-' * left_dash).ljust(widths[0]) + '  ' + ('-' * widths[1]) + '  ' + ('-' * widths[2])
+    print(header_uline)
+
+    # body rows
+    for r in rows:
+        name = str(r[0]).ljust(widths[0])
+        cost = str(r[1]).rjust(widths[1])
+        tax = str(r[2]).ljust(widths[2])
+        print(name + '  ' + cost + '  ' + tax)
+
+    # separator before totals
+    print(header_uline)
+
+    # Totals: count, subtotal/tax, and order total
+    total_items_label = 'Total number of items in order:'
+    print(total_items_label.ljust(widths[0]) + '  ' + str(len(order)).rjust(widths[1]) + '  ' + ''.rjust(widths[2]))
+
+    subtotal_label = 'Order Subtotals:'
+    subtotal = f"${order.order_cost():.2f}"
+    taxstr = f"[Tax: ${order.order_tax():.2f}]"
+    print(subtotal_label.ljust(widths[0]) + '  ' + subtotal.rjust(widths[1]) + '  ' + taxstr.ljust(widths[2]))
+
+    total_label = 'Order Total:'
+    total_amount = f"${order.order_cost() + order.order_tax():.2f}"
+    combined_width = widths[1] + 2 + widths[2]
+    print(total_label.ljust(widths[0]) + '  ' + total_amount.rjust(combined_width))
+
+    # small separator and payment line
+    print('-' * 20)
+    print(f"Paid with {order.payment()}")
+    print(top_sep)
 
 if __name__ == "__main__":
     main()
