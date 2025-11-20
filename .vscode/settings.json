@@ -1,7 +1,0 @@
-{
-    "python.testing.pytestArgs": [
-        "dessert shop"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
-}
