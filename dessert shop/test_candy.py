@@ -1,5 +1,5 @@
 import pytest
-from dessert import Candy, DessertItem
+from dessert import Candy, DessertItem, Cookie
 
 #Unit tests for Candy
 def test_Candy_default():
@@ -34,3 +34,31 @@ def test_Candy_calculate_cost():
 def test_Candy_calculate_tax():
     candy = Candy("Candy Corn", 1.5, 0.25)
     assert candy.calculate_tax() == 0.03
+
+
+def test_Candy_can_combine():
+    candy1 = Candy("Lollipop", 1.0, 2.0)
+    candy2 = Candy("Lollipop", 2.0, 2.0)
+    candy3 = Candy("Lollipop", 1.0, 3.0)
+    candy4 = Candy("Gummy Bears", 1.0, 2.0)
+    cookie = Cookie("Chocolate Chip", 12, 1.5)
+    assert candy1.can_combine(candy2) == True
+    assert candy1.can_combine(candy3) == False
+    assert candy1.can_combine(candy4) == False
+    assert candy1.can_combine(cookie) == False
+
+def test_Candy_combine():
+    candy1 = Candy("Lollipop", 1.0, 2.0)
+    candy2 = Candy("Lollipop", 2.0, 2.0)
+    combined_candy = candy1.combine(candy2)
+    assert combined_candy.weight == 3.0
+    assert combined_candy.name == "Lollipop"
+    assert combined_candy.price_per_pound == 2.0
+
+    candy3 = Candy("Lollipop", 1.0, 3.0)
+    with pytest.raises(ValueError):
+        candy1.combine(candy3)
+
+    cookie = Cookie("Chocolate Chip", 12, 1.5)
+    with pytest.raises(ValueError):
+        candy1.combine(cookie)

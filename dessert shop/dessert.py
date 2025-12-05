@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from packaging import Packaging
 from payment import Payment
+from combine import Combinable
 
 
 class DessertItem(ABC):
@@ -46,6 +47,18 @@ class Candy(DessertItem, Packaging):
     def calculate_cost(self) -> float:
         return round(self.weight * self.price_per_pound, 2)
     
+    def can_combine(self, other: "Candy") -> bool:
+        if isinstance(other, Candy) and self.name == other.name and self.price_per_pound == other.price_per_pound:
+            return True
+        else:
+            return False
+        
+    def combine(self, other: "Candy") -> "Candy":
+        if not self.can_combine(other):
+            raise ValueError("Cannot combine these two Candy items.")
+        self.weight += other.weight
+        return self
+    
     def __str__(self):
         return f"{self.name} ({self.packaging})\n-\t{self.weight} lbs. @ ${self.price_per_pound}/lbs:, ${self.calculate_cost()}, [Tax: ${self.calculate_tax()}]"
 
@@ -59,6 +72,18 @@ class Cookie(DessertItem, Packaging):
 
     def calculate_cost(self) -> float:
         return round((self.number_of_cookies / 12) * self.price_per_dozen, 2)
+    
+    def can_combine(self, other: "Cookie") -> bool:
+        if isinstance(other, Cookie) and self.name == other.name and self.price_per_dozen == other.price_per_dozen:
+            return True
+        else:
+            return False
+        
+    def combine(self, other: "Cookie") -> "Cookie":
+        if not self.can_combine(other):
+            raise ValueError("Cannot combine these two Cookie items.")
+        self.number_of_cookies += other.number_of_cookies
+        return self
     
     def __str__(self):
         return f"{self.name} ({self.packaging})\n-\t{self.number_of_cookies} cookies. @ ${self.price_per_dozen}/dozen:, ${self.calculate_cost()}, [Tax: ${self.calculate_tax()}]"
@@ -105,8 +130,32 @@ class Order():
         return len(self.order)
 
 
+    def __iter__(self):
+        self._iter_index = 0
+        return self
+
+
+    def __next__(self):
+        if self._iter_index >= len(self.order):
+            raise StopIteration
+        item = self.order[self._iter_index]
+        self._iter_index += 1
+        return item
+
+
     def add(self, item):
+        # Try to combine with an existing item if possible. If the incoming
+        # item does not implement `can_combine` (e.g. a test dummy), treat it
+        # as non-combinable and simply append it.
+        for existing_item in self.order:
+            can_combine = getattr(item, "can_combine", None)
+            if callable(can_combine) and item.can_combine(existing_item):
+                existing_item.combine(item)
+                return
+        # No existing item could combine with `item` — append to order.
         self.order.append(item)
+            
+        
 
     def payment(self, payment_method: str | None = None) -> str:
         if payment_method is None:
